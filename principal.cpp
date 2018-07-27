@@ -19,7 +19,7 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
 {
     ui->setupUi(this);
 
-    pixmapMapa->cargarImagen( "../television/images/mapa.png" );
+    pixmapMapa->cargarImagen( "../TeleVision/images/mapa.png" );
 
     connect( ui->pbAbrir, SIGNAL( pressed() ), this, SLOT( slot_abrirImagen() ) );
 
