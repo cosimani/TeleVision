@@ -27,12 +27,15 @@ SOURCES += \
         main.cpp \
         principal.cpp \
     cuadradito.cpp \
-    pixmapmapa.cpp
+    pixmapmapa.cpp \
+    logo.cpp
 
 HEADERS += \
         principal.h \
     cuadradito.h \
-    pixmapmapa.h
+    pixmapmapa.h \
+    logo.h
 
 FORMS += \
-        principal.ui
+        principal.ui \
+    logo.ui

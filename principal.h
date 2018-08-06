@@ -5,6 +5,7 @@
 #include <QFrame>
 #include "cuadradito.h"
 #include "pixmapmapa.h"
+#include <QProcess>
 
 QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
@@ -38,10 +39,18 @@ private:
 
     Cuadradito * cClasificador1, * cClasificador2, * cClasificador3, * cClasificador4;
 
+    QProcess * process;
+
 private slots:
     void slot_abrirImagen();
-
     void slot_cbClasificadoresCambiados();
+    void slot_aplicarKmeans();
+
+        void slot_consola();
+        void slot_errorDeConsola();
+        void slot_scriptFinalizado(int, QProcess::ExitStatus exitStatus);
+        void slot_isStarted();
+        void slot_errorEjecutandoScript( QProcess::ProcessError error );
 };
 
 #endif // PRINCIPAL_H

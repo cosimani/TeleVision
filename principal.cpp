@@ -14,12 +14,13 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
                                            cClasificador1( new Cuadradito( this ) ),
                                            cClasificador2( new Cuadradito( this ) ),
                                            cClasificador3( new Cuadradito( this ) ),
-                                           cClasificador4( new Cuadradito( this ) )
+                                           cClasificador4( new Cuadradito( this ) ),
+                                           process( new QProcess( this ) )
 
 {
     ui->setupUi(this);
 
-    pixmapMapa->cargarImagen( "../TeleVision/images/mapa.png" );
+    pixmapMapa->cargarImagen( "../television/images/cordoba457_cesar.tif" );
 
     connect( ui->pbAbrir, SIGNAL( pressed() ), this, SLOT( slot_abrirImagen() ) );
 
@@ -27,6 +28,8 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
     connect( ui->cbClasif2, SIGNAL( stateChanged( int ) ), this, SLOT( slot_cbClasificadoresCambiados() ) );
     connect( ui->cbClasif3, SIGNAL( stateChanged( int ) ), this, SLOT( slot_cbClasificadoresCambiados() ) );
     connect( ui->cbClasif4, SIGNAL( stateChanged( int ) ), this, SLOT( slot_cbClasificadoresCambiados() ) );
+
+    connect( ui->pbKmeans, SIGNAL( pressed() ), this, SLOT( slot_aplicarKmeans() ) );
 
     this->setAcceptDrops( true );
 
@@ -37,6 +40,21 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
     cClasificador3->configurar( 50, QColor( 255, 0, 0, 150 ), QPoint( 400, 150 ), "agua" );
 
     cClasificador4->configurar( 50, QColor( 255, 255, 0, 150 ), QPoint( 500, 150 ), "roca" );
+
+    connect( process, SIGNAL( errorOccurred( QProcess::ProcessError ) ),
+             this, SLOT( slot_errorEjecutandoScript( QProcess::ProcessError ) ) );
+
+    connect( process, SIGNAL( finished( int, QProcess::ExitStatus ) ),
+             this, SLOT( slot_scriptFinalizado( int, QProcess::ExitStatus ) ) );
+
+    connect( process, SIGNAL( started() ), this, SLOT( slot_isStarted() ) );
+
+    connect( process, SIGNAL( readyReadStandardOutput() ), this, SLOT( slot_consola() ) );
+    connect( process, SIGNAL( readyReadStandardError() ), this, SLOT( slot_errorDeConsola() ) );
+
+
+
+
 
 }
 
@@ -50,7 +68,7 @@ void Principal::paintEvent( QPaintEvent * )  {
 }
 
 void Principal::slot_abrirImagen()  {
-    QString file = QFileDialog::getOpenFileName( this, "Abri Imagen", "../", "Images (*.png *.jpg *.tiff)" );
+    QString file = QFileDialog::getOpenFileName( this, "Abri Imagen", "../", "Images (*.png *.jpg *.tif)" );
     pixmapMapa->cargarImagen( file );
 
 }
@@ -89,6 +107,47 @@ void Principal::slot_cbClasificadoresCambiados()
     else  {
         cClasificador4->hide();
     }
+
+}
+
+void Principal::slot_aplicarKmeans()
+{
+
+    // Se deben enviar los siguientes parametros:
+    // directorio del proyecto: por ejemplo: /home/cosimani/Proyecto/2018/Curso FAMAF/TeleVisión/TeleVision
+    // ruta completa de la imagen: por ejemplo /home/cosimani/pictures/im.png
+    // clusters de K-Means
+    // donde almacenar la resultante:
+    //    por ejemplo: /home/cosimani/Proyecto/2018/Curso FAMAF/TeleVisión/TeleVision/processedImages/unsupervised/im_001.png
+
+
+    if ( process->state() == QProcess::NotRunning )  {
+
+        QString script = "../television/python/TeleVision_nosupervisado.py";
+
+        QString dirProyecto = "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television";
+
+        QStringList parametros;
+        parametros << script;
+        parametros << dirProyecto;
+        parametros << "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television/images/cordoba457_cesar.tif";
+        parametros << "4";
+        parametros << dirProyecto + "/processedImages/unsupervised/cordoba457_cesar_001.tif";
+
+        process->start( "python3", parametros );
+    }
+    else
+    {
+        QStringList argumentos = process->arguments();
+        QString mensaje;
+
+        if ( ! argumentos.isEmpty() )
+        mensaje = "Es el siguiente: \n " + process->arguments().at( 0 );
+
+        QMessageBox::critical( this, "Proceso en ejecucion", "Aun no ha finalizado un script ejecutado \n"
+                                     "anteriormente. " + mensaje );
+    }
+
 
 }
 
@@ -313,3 +372,63 @@ void Principal::keyPressEvent( QKeyEvent * event )
     cClasificador1->actualizar();
 
 }
+
+
+void Principal::slot_errorEjecutandoScript(QProcess::ProcessError error)
+{
+    QString mensajeError;
+
+    switch(error)  {
+    case QProcess::FailedToStart:  mensajeError = "Script not found, resource error";  break;
+    case QProcess::Crashed:  mensajeError = "Crashed";  break;
+    case QProcess::Timedout:  mensajeError = "Timeout";  break;
+    case QProcess::ReadError:  mensajeError = "Read Error";  break;
+    case QProcess::WriteError:  mensajeError = "Write Error";  break;
+    case QProcess::UnknownError:  mensajeError = "Error desconocido";  break;
+    default:;
+    }
+
+    QMessageBox::critical(this, "Mensaje de Error", "El mensaje de error con la ejecucion del \n"
+                                                    "Script en python3 es: " + mensajeError);
+}
+
+void Principal::slot_consola()
+{
+    QByteArray ba = process->readAllStandardOutput();
+
+    pixmapMapa->cargarImagen( ba.trimmed() );
+}
+
+void Principal::slot_errorDeConsola()
+{
+    qDebug() << "Errores en Consola";
+    QByteArray ba = process->readAllStandardError();
+
+//    ui->teConsola->append(ba);
+    qDebug() << "slot_errorDeConsola" << ba;
+}
+
+void Principal::slot_scriptFinalizado( int, QProcess::ExitStatus exitStatus )
+{
+    ui->logo->setIsRunning( false );
+
+    if ( exitStatus == QProcess::CrashExit )  {
+        QMessageBox::critical(this, "Mensaje de Error", "El script finalizo con el siguiente mensaje: Crashed");
+        return;
+    }
+
+//    if ( etapa == NADA && exitStatus == QProcess::NormalExit )
+//        emit signal_nuevaEtapa( DATA_PREPARATION_LISTO );
+//    else if ( etapa == DATA_PREPARATION_LISTO && exitStatus == QProcess::NormalExit )
+//        emit signal_nuevaEtapa( UNSUPERVISED_DICTIONARY_LEARNING_LISTO );
+//    else if ( etapa == UNSUPERVISED_DICTIONARY_LEARNING_LISTO && exitStatus == QProcess::NormalExit )
+//        emit signal_nuevaEtapa( COMPUTE_BoVW_VECTORS_LISTO );
+//    else if ( etapa == COMPUTE_BoVW_VECTORS_LISTO && exitStatus == QProcess::NormalExit )
+//        emit signal_nuevaEtapa( TRAIN_CLASSIFIERS_LISTO );
+}
+
+void Principal::slot_isStarted()
+{
+    ui->logo->setIsRunning(true);
+}
+
