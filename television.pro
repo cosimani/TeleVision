@@ -28,14 +28,17 @@ SOURCES += \
         principal.cpp \
     cuadradito.cpp \
     pixmapmapa.cpp \
-    logo.cpp
+    logo.cpp \
+    visualizador.cpp
 
 HEADERS += \
         principal.h \
     cuadradito.h \
     pixmapmapa.h \
-    logo.h
+    logo.h \
+    visualizador.h
 
 FORMS += \
         principal.ui \
-    logo.ui
+    logo.ui \
+    visualizador.ui

@@ -18,7 +18,8 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
                                            cClasificador2( new Cuadradito( this ) ),
                                            cClasificador3( new Cuadradito( this ) ),
                                            cClasificador4( new Cuadradito( this ) ),
-                                           process( new QProcess( this ) )
+                                           process( new QProcess( this ) ),
+                                           visualizador( new Visualizador( this ) )
 
 {
     ui->setupUi(this);
@@ -170,8 +171,14 @@ void Principal::slot_aplicarKmeans()
 
         QFileInfo infoRutaImagenActual( rutaImagenActual );
 
-        parametros << dirProyecto + "/processedImages/unsupervised/" +
-                      infoRutaImagenActual.baseName() + "_" + sNumero + ".jpg";
+        // Hacemos esta copia para poder mostrar la imagen original en el Visualizador, ya que en slot_consola se setea
+        // como imagen actual a la que se acaba de procesar.
+        rutaImagenOriginal = rutaImagenActual;
+
+        rutaImagenActualProcesada = dirProyecto + "/processedImages/unsupervised/" +
+                                    infoRutaImagenActual.baseName() + "_" + sNumero + ".jpg";
+
+        parametros << rutaImagenActualProcesada;
 
         process->start( "python3", parametros );
     }
@@ -258,8 +265,14 @@ void Principal::slot_aplicarSupervisado()
 
         QFileInfo infoRutaImagenActual( rutaImagenActual );
 
-        parametros << dirProyecto + "/processedImages/supervised/" +
-                      infoRutaImagenActual.baseName() + "_" + sNumero + ".jpg";
+        // Hacemos esta copia para poder mostrar la imagen original en el Visualizador, ya que en slot_consola se setea
+        // como imagen actual a la que se acaba de procesar.
+        rutaImagenOriginal = rutaImagenActual;
+
+        rutaImagenActualProcesada = dirProyecto + "/processedImages/supervised/" +
+                                    infoRutaImagenActual.baseName() + "_" + sNumero + ".jpg";
+
+        parametros << rutaImagenActualProcesada;
 
 
         // Aca se calcular los x1 x2 y1 y2 ...
@@ -562,6 +575,7 @@ void Principal::slot_errorEjecutandoScript(QProcess::ProcessError error)
                                                     "Script en python3 es: " + mensajeError);
 }
 
+// Esta metodo lee todo lo que esta mostrando la consola de python.
 void Principal::slot_consola()
 {
     QByteArray ba = process->readAllStandardOutput();
@@ -589,6 +603,9 @@ void Principal::slot_scriptFinalizado( int, QProcess::ExitStatus exitStatus )
         QMessageBox::critical(this, "Mensaje de Error", "El script finalizo con el siguiente mensaje: Crashed");
         return;
     }
+
+    visualizador->setImagenes( rutaImagenOriginal, rutaImagenActualProcesada );
+    visualizador->showMaximized();
 
 //    if ( etapa == NADA && exitStatus == QProcess::NormalExit )
 //        emit signal_nuevaEtapa( DATA_PREPARATION_LISTO );

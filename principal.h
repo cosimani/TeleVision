@@ -6,6 +6,7 @@
 #include "cuadradito.h"
 #include "pixmapmapa.h"
 #include <QProcess>
+#include "visualizador.h"
 
 QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
@@ -41,7 +42,8 @@ private:
 
     QProcess * process;
 
-    QString rutaImagenActual;
+    QString rutaImagenActual, rutaImagenActualProcesada, rutaImagenOriginal;
+    Visualizador * visualizador;
 
 private slots:
     void slot_abrirImagen();
