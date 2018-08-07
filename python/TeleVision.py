@@ -10,11 +10,10 @@ from skimage import io
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
+from PIL import Image
+
 import sys
  
-print "Número de parámetros: ", len(sys.argv)
-print "Lista de argumentos: ", sys.argv
-
 
 classes = { 'vegetation': 0, 'building': 1, 'water': 2 }
 n_classes = len( classes )

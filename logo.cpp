@@ -9,7 +9,7 @@ Logo::Logo(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    imLogo.load("../television/images/logo.jpg");
+    imLogo.load("../television/images/logo.png");
     imWait.load("../television/images/wait.png");
 
     timer.setInterval(80);

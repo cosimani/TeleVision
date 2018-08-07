@@ -41,16 +41,19 @@ private:
 
     QProcess * process;
 
+    QString rutaImagenActual;
+
 private slots:
     void slot_abrirImagen();
     void slot_cbClasificadoresCambiados();
     void slot_aplicarKmeans();
+    void slot_aplicarSupervisado();
 
-        void slot_consola();
-        void slot_errorDeConsola();
-        void slot_scriptFinalizado(int, QProcess::ExitStatus exitStatus);
-        void slot_isStarted();
-        void slot_errorEjecutandoScript( QProcess::ProcessError error );
+    void slot_consola();
+    void slot_errorDeConsola();
+    void slot_scriptFinalizado(int, QProcess::ExitStatus exitStatus);
+    void slot_isStarted();
+    void slot_errorEjecutandoScript( QProcess::ProcessError error );
 };
 
 #endif // PRINCIPAL_H

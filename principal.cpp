@@ -7,6 +7,9 @@
 #include <QDebug>
 #include <QtWidgets>
 #include <QKeyEvent>
+#include <QMessageBox>
+#include <QDir>
+#include <QFileInfo>
 
 Principal::Principal( QWidget * parent ) : QWidget( parent ),
                                            ui( new Ui::Principal ),
@@ -20,7 +23,8 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
 {
     ui->setupUi(this);
 
-    pixmapMapa->cargarImagen( "../television/images/cordoba457_cesar.tif" );
+    rutaImagenActual = "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television/images/cordoba457_cesar.tif";
+    pixmapMapa->cargarImagen( rutaImagenActual );
 
     connect( ui->pbAbrir, SIGNAL( pressed() ), this, SLOT( slot_abrirImagen() ) );
 
@@ -30,6 +34,7 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
     connect( ui->cbClasif4, SIGNAL( stateChanged( int ) ), this, SLOT( slot_cbClasificadoresCambiados() ) );
 
     connect( ui->pbKmeans, SIGNAL( pressed() ), this, SLOT( slot_aplicarKmeans() ) );
+    connect( ui->pbSupervisado, SIGNAL( pressed() ), this, SLOT( slot_aplicarSupervisado() ) );
 
     this->setAcceptDrops( true );
 
@@ -70,6 +75,8 @@ void Principal::paintEvent( QPaintEvent * )  {
 void Principal::slot_abrirImagen()  {
     QString file = QFileDialog::getOpenFileName( this, "Abri Imagen", "../", "Images (*.png *.jpg *.tif)" );
     pixmapMapa->cargarImagen( file );
+
+    rutaImagenActual = file;
 
 }
 
@@ -113,6 +120,11 @@ void Principal::slot_cbClasificadoresCambiados()
 void Principal::slot_aplicarKmeans()
 {
 
+    if ( ui->leClusters->text().toInt() < 2 || ui->leClusters->text().toInt() > 6 )  {
+        QMessageBox::information( this, "Fuera de rango", "La cantidad de clusters disponibles debe ser entre 2 y 6" );
+        return;
+    }
+
     // Se deben enviar los siguientes parametros:
     // directorio del proyecto: por ejemplo: /home/cosimani/Proyecto/2018/Curso FAMAF/TeleVisión/TeleVision
     // ruta completa de la imagen: por ejemplo /home/cosimani/pictures/im.png
@@ -130,9 +142,167 @@ void Principal::slot_aplicarKmeans()
         QStringList parametros;
         parametros << script;
         parametros << dirProyecto;
-        parametros << "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television/images/cordoba457_cesar.tif";
-        parametros << "4";
-        parametros << dirProyecto + "/processedImages/unsupervised/cordoba457_cesar_001.tif";
+        parametros << rutaImagenActual;
+        parametros << ui->leClusters->text();
+
+        // Donde almacenar?
+
+        QDir directory( dirProyecto + "/processedImages/unsupervised" );
+
+        QStringList fileFilter;
+        fileFilter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.tif";
+        QStringList imageFiles = directory.entryList( fileFilter );
+
+        int ultimoNumero = 0;
+
+        for ( int i = 0; i < imageFiles.size(); i++ )
+        {
+            QFileInfo info( imageFiles.at( i ) );
+            QString nombreArchivo = info.baseName();  // nombre sin extension
+            int comienzoNumero = nombreArchivo.lastIndexOf( "_" ) + 1;
+            int numero = nombreArchivo.mid( comienzoNumero, nombreArchivo.size() ).toInt();
+
+            if ( ultimoNumero <= numero )
+                ultimoNumero = numero;
+        }
+
+        QString sNumero = QString::number( ++ultimoNumero ).rightJustified(4, '0');
+
+        QFileInfo infoRutaImagenActual( rutaImagenActual );
+
+        parametros << dirProyecto + "/processedImages/unsupervised/" +
+                      infoRutaImagenActual.baseName() + "_" + sNumero + ".jpg";
+
+        process->start( "python3", parametros );
+    }
+    else
+    {
+        QStringList argumentos = process->arguments();
+        QString mensaje;
+
+        if ( ! argumentos.isEmpty() )
+        mensaje = "Es el siguiente: \n " + process->arguments().at( 0 );
+
+        QMessageBox::critical( this, "Proceso en ejecucion", "Aun no ha finalizado un script ejecutado \n"
+                                     "anteriormente. " + mensaje );
+    }
+
+
+}
+
+void Principal::slot_aplicarSupervisado()
+{
+    int cantidadClases = 0;
+
+    if ( ui->cbClasif1->isChecked() )
+        cantidadClases++;
+    if ( ui->cbClasif2->isChecked() )
+        cantidadClases++;
+    if ( ui->cbClasif3->isChecked() )
+        cantidadClases++;
+    if ( ui->cbClasif4->isChecked() )
+        cantidadClases++;
+
+    if ( cantidadClases < 2 )  {
+        QMessageBox::information( this, "Fuera de rango", "La cantidad de clases debe ser entre 2 y 4" );
+        return;
+    }
+
+    // Se deben enviar los siguientes parametros:
+    // directorio del proyecto: por ejemplo: /home/cosimani/Proyecto/2018/Curso FAMAF/TeleVisión/TeleVision
+    // ruta completa de la imagen: por ejemplo /home/cosimani/pictures/im.png
+    // clases definidad, es decir, cuantas muestras se definieron
+    // donde almacenar la resultante:
+    //    por ejemplo: /home/cosimani/Proyecto/2018/Curso FAMAF/TeleVisión/TeleVision/processedImages/unsupervised/im_001.png
+    // Los demas parametros son>
+    //   x1 clasif1  x2 clasif1  y1 clasif1  y2 clasif1
+    //   x1 clasif2  x2 clasif2  y1 clasif2  y2 clasif2
+    //   x1 clasif3  x2 clasif3  y1 clasif3  y2 clasif3
+    //   x1 clasif4  x2 clasif4  y1 clasif4  y2 clasif4
+
+    if ( process->state() == QProcess::NotRunning )  {
+
+        QString script = "../television/python/TeleVision_supervisado.py";
+
+        QString dirProyecto = "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television";
+
+        QStringList parametros;
+        parametros << script;
+        parametros << dirProyecto;
+        parametros << rutaImagenActual;
+        parametros << QString::number( cantidadClases );
+
+
+        // Donde almacenar?
+
+        QDir directory( dirProyecto + "/processedImages/supervised" );
+
+        QStringList fileFilter;
+        fileFilter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.tif";
+        QStringList imageFiles = directory.entryList( fileFilter );
+
+        int ultimoNumero = 0;
+
+        for ( int i = 0; i < imageFiles.size(); i++ )
+        {
+            QFileInfo info( imageFiles.at( i ) );
+            QString nombreArchivo = info.baseName();  // nombre sin extension
+            int comienzoNumero = nombreArchivo.lastIndexOf( "_" ) + 1;
+            int numero = nombreArchivo.mid( comienzoNumero, nombreArchivo.size() ).toInt();
+
+            if ( ultimoNumero <= numero )
+                ultimoNumero = numero;
+        }
+
+        QString sNumero = QString::number( ++ultimoNumero ).rightJustified(4, '0');
+
+        QFileInfo infoRutaImagenActual( rutaImagenActual );
+
+        parametros << dirProyecto + "/processedImages/supervised/" +
+                      infoRutaImagenActual.baseName() + "_" + sNumero + ".jpg";
+
+
+        // Aca se calcular los x1 x2 y1 y2 ...
+
+        int x1Clasif1 = cClasificador1->getPos().x();
+        int x2Clasif1 = x1Clasif1 + cClasificador1->getLado();
+        int y1Clasif1 = cClasificador1->getPos().y();
+        int y2Clasif1 = y1Clasif1 + cClasificador1->getLado();
+
+        int x1Clasif2 = cClasificador2->getPos().x();
+        int x2Clasif2 = x1Clasif2 + cClasificador2->getLado();
+        int y1Clasif2 = cClasificador2->getPos().y();
+        int y2Clasif2 = y1Clasif2 + cClasificador2->getLado();
+
+        int x1Clasif3 = cClasificador3->getPos().x();
+        int x2Clasif3 = x1Clasif3 + cClasificador3->getLado();
+        int y1Clasif3 = cClasificador3->getPos().y();
+        int y2Clasif3 = y1Clasif3 + cClasificador3->getLado();
+
+        int x1Clasif4 = cClasificador4->getPos().x();
+        int x2Clasif4 = x1Clasif4 + cClasificador4->getLado();
+        int y1Clasif4 = cClasificador4->getPos().y();
+        int y2Clasif4 = y1Clasif4 + cClasificador4->getLado();
+
+        parametros << QString::number( x1Clasif1 );
+        parametros << QString::number( x2Clasif1 );
+        parametros << QString::number( y1Clasif1 );
+        parametros << QString::number( y2Clasif1 );
+
+        parametros << QString::number( x1Clasif2 );
+        parametros << QString::number( x2Clasif2 );
+        parametros << QString::number( y1Clasif2 );
+        parametros << QString::number( y2Clasif2 );
+
+        parametros << QString::number( x1Clasif3 );
+        parametros << QString::number( x2Clasif3 );
+        parametros << QString::number( y1Clasif3 );
+        parametros << QString::number( y2Clasif3 );
+
+        parametros << QString::number( x1Clasif4 );
+        parametros << QString::number( x2Clasif4 );
+        parametros << QString::number( y1Clasif4 );
+        parametros << QString::number( y2Clasif4 );
 
         process->start( "python3", parametros );
     }
@@ -395,8 +565,11 @@ void Principal::slot_errorEjecutandoScript(QProcess::ProcessError error)
 void Principal::slot_consola()
 {
     QByteArray ba = process->readAllStandardOutput();
+    qDebug() << ba.trimmed();
 
     pixmapMapa->cargarImagen( ba.trimmed() );
+
+    rutaImagenActual = ba.trimmed();
 }
 
 void Principal::slot_errorDeConsola()
