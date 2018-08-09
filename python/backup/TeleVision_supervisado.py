@@ -9,7 +9,6 @@ import numpy as np
 from skimage import io
 from sklearn.svm import SVC
 import sys
-import cv2
  
 dir_de_trabajo = sys.argv[ 1 ]
 ruta_completa_imagen = sys.argv[ 2 ]
@@ -54,12 +53,6 @@ else :  # Si por algun motivo esta fuera de rango, por defecto se toma 4
 
 #img = io.imread('https://i.stack.imgur.com/TFOv7.png')
 img = io.imread( ruta_completa_imagen )
-
-# Si es igual a 2, entonces es una imagen con una sola banda.
-# Si es asi, entonces la transformamos en RGB, pero en escala de grises
-if len( img.shape ) == 2 :
-    img = cv2.cvtColor( img, cv2.COLOR_GRAY2RGB )
-
 rows, cols, bands = img.shape
 
 # No supervisado

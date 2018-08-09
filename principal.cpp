@@ -591,7 +591,6 @@ void Principal::slot_errorDeConsola()
     qDebug() << "Errores en Consola";
     QByteArray ba = process->readAllStandardError();
 
-//    ui->teConsola->append(ba);
     qDebug() << "slot_errorDeConsola" << ba;
 }
 

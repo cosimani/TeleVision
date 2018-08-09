@@ -39,86 +39,136 @@
       <string>Configuraciones</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="9" column="0" colspan="2">
+      <item row="0" column="0" colspan="2">
+       <widget class="QGroupBox" name="gbSupervisado">
+        <property name="title">
+         <string>Supervisado</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="cbClasif3">
+           <property name="text">
+            <string>3</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="3">
+          <widget class="QLabel" name="lClasif">
+           <property name="text">
+            <string>Muestras</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="cbClasif1">
+           <property name="text">
+            <string>1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="cbClasif2">
+           <property name="text">
+            <string>2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="cbClasif4">
+           <property name="text">
+            <string>4</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="3">
+          <widget class="QPushButton" name="pbSupervisado">
+           <property name="text">
+            <string>Clasificar</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="10" column="0" colspan="2">
        <widget class="QPushButton" name="pbAbrir">
         <property name="text">
          <string>Abrir imagen</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
-       <widget class="QLineEdit" name="leClusters">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
+      <item row="1" column="0">
+       <widget class="QGroupBox" name="gbNoSupervisado">
+        <property name="title">
+         <string>No supervisado</string>
         </property>
-        <property name="text">
-         <string>4</string>
-        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="1" column="0" colspan="2">
+          <widget class="QPushButton" name="pbKmeans">
+           <property name="text">
+            <string>K-Means</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leClusters">
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>4</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="lClusters">
+           <property name="text">
+            <string>K = </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="cbClasif2">
-        <property name="text">
-         <string>2</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QCheckBox" name="cbClasif4">
-        <property name="text">
-         <string>4</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0" colspan="2">
+      <item row="2" column="0">
        <widget class="Logo" name="logo" native="true"/>
       </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QCheckBox" name="cbClasif3">
-        <property name="text">
-         <string>3</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="2">
-       <widget class="QPushButton" name="pbKmeans">
-        <property name="text">
-         <string>Aplicar K-Means</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="cbClasif1">
-        <property name="text">
-         <string>1</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="lClusters">
-        <property name="text">
-         <string>Clusters</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="lClasif">
-        <property name="text">
-         <string>Clasificadores</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QPushButton" name="pbSupervisado">
-        <property name="text">
-         <string>Supervisado</string>
-        </property>
+      <item row="11" column="0" colspan="2">
+       <widget class="QComboBox" name="cbBandas">
+        <item>
+         <property name="text">
+          <string>3 bandas</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Banda 1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Banda 2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Banda 3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string/>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
