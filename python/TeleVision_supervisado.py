@@ -51,8 +51,6 @@ else :  # Si por algun motivo esta fuera de rango, por defecto se toma 4
     palette = np.uint8( [ [ 0, 255, 0 ], [ 255, 0, 0 ], [ 0, 0, 255 ], [ 255, 0, 255 ] ] )
     classes = { 'Clasif1': 0, 'Clasif2': 1, 'Clasif3': 2, 'Clasif4': 3 }
 
-
-#img = io.imread('https://i.stack.imgur.com/TFOv7.png')
 img = io.imread( ruta_completa_imagen )
 
 # Si es igual a 2, entonces es una imagen con una sola banda.
@@ -69,24 +67,24 @@ X = img.reshape( rows * cols, bands )
 supervised = n_classes * np.ones( shape = ( rows, cols ), dtype = np.int )
 
 if n_classes == 2 :
-    supervised[ x1Clasif1 : x2Clasif1, y1Clasif1 : y2Clasif1 ] = classes[ 'Clasif1' ]
-    supervised[ x1Clasif2 : x2Clasif2, y1Clasif2 : y2Clasif2 ] = classes[ 'Clasif2' ]
+    supervised[ y1Clasif1 : y2Clasif1, x1Clasif1 : x2Clasif1 ] = classes[ 'Clasif1' ]
+    supervised[ y1Clasif2 : y2Clasif2, x1Clasif2 : x2Clasif2 ] = classes[ 'Clasif2' ]
 elif n_classes == 3 :
-    supervised[ x1Clasif1 : x2Clasif1, y1Clasif1 : y2Clasif1 ] = classes[ 'Clasif1' ]
-    supervised[ x1Clasif2 : x2Clasif2, y1Clasif2 : y2Clasif2 ] = classes[ 'Clasif2' ]
-    supervised[ x1Clasif3 : x2Clasif3, y1Clasif3 : y2Clasif3 ] = classes[ 'Clasif3' ]
+    supervised[ y1Clasif1 : y2Clasif1, x1Clasif1 : x2Clasif1 ] = classes[ 'Clasif1' ]
+    supervised[ y1Clasif2 : y2Clasif2, x1Clasif2 : x2Clasif2 ] = classes[ 'Clasif2' ]
+    supervised[ y1Clasif3 : y2Clasif3, x1Clasif3 : x2Clasif3 ] = classes[ 'Clasif3' ]
 elif n_classes == 4 :
-    supervised[ x1Clasif1 : x2Clasif1, y1Clasif1 : y2Clasif1 ] = classes[ 'Clasif1' ]
-    supervised[ x1Clasif2 : x2Clasif2, y1Clasif2 : y2Clasif2 ] = classes[ 'Clasif2' ]
-    supervised[ x1Clasif3 : x2Clasif3, y1Clasif3 : y2Clasif3 ] = classes[ 'Clasif3' ]
-    supervised[ x1Clasif4 : x2Clasif4, y1Clasif4 : y2Clasif4 ] = classes[ 'Clasif4' ]
+    supervised[ y1Clasif1 : y2Clasif1, x1Clasif1 : x2Clasif1 ] = classes[ 'Clasif1' ]
+    supervised[ y1Clasif2 : y2Clasif2, x1Clasif2 : x2Clasif2 ] = classes[ 'Clasif2' ]
+    supervised[ y1Clasif3 : y2Clasif3, x1Clasif3 : x2Clasif3 ] = classes[ 'Clasif3' ]
+    supervised[ y1Clasif4 : y2Clasif4, x1Clasif4 : x2Clasif4 ] = classes[ 'Clasif4' ]
 else :  # Si por algun motivo esta fuera de rango, por defecto se toma 4
     n_classes = 4
-    supervised[ x1Clasif1 : x2Clasif1, y1Clasif1 : y2Clasif1 ] = classes[ 'Clasif1' ]
-    supervised[ x1Clasif2 : x2Clasif2, y1Clasif2 : y2Clasif2 ] = classes[ 'Clasif2' ]
-    supervised[ x1Clasif3 : x2Clasif3, y1Clasif3 : y2Clasif3 ] = classes[ 'Clasif3' ]
-    supervised[ x1Clasif4 : x2Clasif4, y1Clasif4 : y2Clasif4 ] = classes[ 'Clasif4' ]
-
+    supervised[ y1Clasif1 : y2Clasif1, x1Clasif1 : x2Clasif1 ] = classes[ 'Clasif1' ]
+    supervised[ y1Clasif2 : y2Clasif2, x1Clasif2 : x2Clasif2 ] = classes[ 'Clasif2' ]
+    supervised[ y1Clasif3 : y2Clasif3, x1Clasif3 : x2Clasif3 ] = classes[ 'Clasif3' ]
+    supervised[ y1Clasif4 : y2Clasif4, x1Clasif4 : x2Clasif4 ] = classes[ 'Clasif4' ]
+    
 y = supervised.ravel()
 train = np.flatnonzero( supervised < n_classes )
 test = np.flatnonzero( supervised == n_classes )

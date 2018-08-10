@@ -56,6 +56,8 @@ private slots:
     void slot_scriptFinalizado(int, QProcess::ExitStatus exitStatus);
     void slot_isStarted();
     void slot_errorEjecutandoScript( QProcess::ProcessError error );
+
+    void slot_cbBandasCambia(int index);
 };
 
 #endif // PRINCIPAL_H

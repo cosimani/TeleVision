@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     Principal w;
     w.resize( 1200, 600 );
     w.move( 100, 50 );
-    w.show();
+    w.showMaximized();
 
     return a.exec();
 }

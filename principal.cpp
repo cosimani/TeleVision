@@ -24,7 +24,7 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
 {
     ui->setupUi(this);
 
-    rutaImagenActual = "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television/images/cordoba457_cesar.tif";
+    rutaImagenActual = "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television/mapas/cordoba457_bandas.tif";
     pixmapMapa->cargarImagen( rutaImagenActual );
 
     connect( ui->pbAbrir, SIGNAL( pressed() ), this, SLOT( slot_abrirImagen() ) );
@@ -58,7 +58,7 @@ Principal::Principal( QWidget * parent ) : QWidget( parent ),
     connect( process, SIGNAL( readyReadStandardOutput() ), this, SLOT( slot_consola() ) );
     connect( process, SIGNAL( readyReadStandardError() ), this, SLOT( slot_errorDeConsola() ) );
 
-
+    connect( ui->cbBandas, SIGNAL( currentIndexChanged( int ) ), this, SLOT( slot_cbBandasCambia( int ) ) );
 
 
 
@@ -74,7 +74,7 @@ void Principal::paintEvent( QPaintEvent * )  {
 }
 
 void Principal::slot_abrirImagen()  {
-    QString file = QFileDialog::getOpenFileName( this, "Abri Imagen", "../", "Images (*.png *.jpg *.tif)" );
+    QString file = QFileDialog::getOpenFileName( this, "Abri Imagen", "../television/mapas", "Images (*.png *.jpg *.tif)" );
     pixmapMapa->cargarImagen( file );
 
     rutaImagenActual = file;
@@ -301,6 +301,12 @@ void Principal::slot_aplicarSupervisado()
         parametros << QString::number( x2Clasif1 );
         parametros << QString::number( y1Clasif1 );
         parametros << QString::number( y2Clasif1 );
+
+        qDebug() << "( " << x1Clasif1 << ", " << y1Clasif1 << ")";
+        qDebug() << "( " << x2Clasif1 << ", " << y2Clasif1 << ")";
+
+        qDebug() << "( " << x1Clasif2 << ", " << y1Clasif2 << ")";
+        qDebug() << "( " << x2Clasif2 << ", " << y2Clasif2 << ")";
 
         parametros << QString::number( x1Clasif2 );
         parametros << QString::number( x2Clasif2 );
@@ -575,6 +581,8 @@ void Principal::slot_errorEjecutandoScript(QProcess::ProcessError error)
                                                     "Script en python3 es: " + mensajeError);
 }
 
+
+
 // Esta metodo lee todo lo que esta mostrando la consola de python.
 void Principal::slot_consola()
 {
@@ -619,5 +627,70 @@ void Principal::slot_scriptFinalizado( int, QProcess::ExitStatus exitStatus )
 void Principal::slot_isStarted()
 {
     ui->logo->setIsRunning(true);
+}
+
+
+// index = 0 -> 3 bandas
+// index = 1 -> Banda 1
+// index = 2 -> Banda 2
+// index = 3 -> Banda 3
+void Principal::slot_cbBandasCambia( int index )
+{
+    QString dirProyecto = "/home/cosimani/Proyecto/2018/CursoFAMAF/TeleVision/television";
+
+    QDir directoryMapas( dirProyecto + "/mapas" );
+
+    QStringList fileFilter;
+    fileFilter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.tif";
+    QStringList imageFiles = directoryMapas.entryList( fileFilter );
+
+    for ( int i = 0; i < imageFiles.size(); i++ )
+    {
+        QFileInfo info( imageFiles.at( i ) );
+        QString nombreArchivo = info.baseName();  // nombre sin extension
+        QString extension = info.suffix();  // extension
+
+        QFileInfo infoRutaImagenActual( this->rutaImagenActual );
+        QString nombreImagenActual = infoRutaImagenActual.baseName();  // nombre sin extension
+
+
+        int comienzoDeNumeroDeBanda = nombreArchivo.lastIndexOf( "_banda" );
+        nombreArchivo = nombreArchivo.remove( comienzoDeNumeroDeBanda, 7 );  // deja todos sin _bandaX....
+
+        int comienzoDeNumeroDeBandaImagenActual = nombreArchivo.lastIndexOf( "_banda" );
+        nombreImagenActual = nombreImagenActual.remove( comienzoDeNumeroDeBanda, 7 );  // deja todos sin _bandaX....
+
+
+        qDebug() << "quedo" << nombreArchivo;
+
+        // entre aca cuando estamos en el archivo que queremos seleccionar si mostramos todas las bandas o una sola
+        if ( nombreArchivo.contains( nombreImagenActual ) )  {
+
+            if ( index == 1 )  {  // queremos mostrar banda 1
+                rutaImagenActual = dirProyecto + "/mapas/" + nombreArchivo + "_banda1." + extension;
+                pixmapMapa->cargarImagen( rutaImagenActual );
+                qDebug() << rutaImagenActual;
+                return;
+            }
+            else if ( index == 2 )  {  // queremos mostrar banda 2
+                rutaImagenActual = dirProyecto + "/mapas/" + nombreArchivo + "_banda2." + extension;
+                pixmapMapa->cargarImagen( rutaImagenActual );
+                qDebug() << rutaImagenActual;
+                return;
+            }
+            else if ( index == 3 )  {  // queremos mostrar banda 3
+                rutaImagenActual = dirProyecto + "/mapas/" + nombreArchivo + "_banda3." + extension;
+                pixmapMapa->cargarImagen( rutaImagenActual );
+                qDebug() << rutaImagenActual;
+                return;
+            }
+            else  {  // queremos mostrar todas las bandas
+                rutaImagenActual = dirProyecto + "/mapas/" + nombreArchivo + "_bandas." + extension;
+                pixmapMapa->cargarImagen( rutaImagenActual );
+                qDebug() << rutaImagenActual;
+                return;
+            }
+        }
+    }
 }
 
